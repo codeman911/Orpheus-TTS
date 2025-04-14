@@ -1,0 +1,13 @@
+Speaker Analysis Results (sorted by duration)
+===========================================
+
+Total speakers found: 6
+
+Speaker Name                                  | Duration (hours)
+-----------------------------------------------+----------------
+Emirati_female_1                                 |          37.76
+Emirati_male_2                                   |          36.11
+Emirati_male_1                                   |          35.74
+Emirati_male_6                                   |          35.47
+Emirati_male_3                                   |          34.10
+Emirati_male_4                                   |           0.02
