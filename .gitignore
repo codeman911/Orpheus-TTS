@@ -1,2 +1,3 @@
 .DS_Store
-speaker_finetune/checkpoints/
+/speaker_finetune/checkpoints/
+
