@@ -1,0 +1,56 @@
+# Dataset Configuration
+# List of paths to your local dataset directories
+TTS_datasets:
+  - "/vast/audio/experiment/Orpheus-TTS/speaker_finetune/datasets/ar_v2"
+  - "/vast/audio/experiment/Orpheus-TTS/speaker_finetune/datasets/en_v2"
+  - "/vast/audio/experiment/Orpheus-TTS/speaker_finetune/datasets/zh_v2"
+  - "/vast/audio/experiment/Orpheus-TTS/1b_pretrain/datasets/en_hf"
+  # Add more paths as needed
+
+# model_name: "canopylabs/orpheus-tts-0.1-pretrained"
+# tokenizer_name: "canopylabs/orpheus-tts-0.1-pretrained"
+
+# model_name: "/vast/audio/experiment/Orpheus-TTS/finetune/checkpoints/checkpoint-375000"
+# tokenizer_name: "/vast/audio/experiment/Orpheus-TTS/finetune/checkpoints/checkpoint-375000"
+
+model_name: "v1kram/spk_ft"
+tokenizer_name: "v1kram/spk_ft"
+
+
+
+# Training Args
+epochs: 4
+batch_size: 4
+number_processes: 8
+pad_token: 128263
+save_steps: 1500
+learning_rate: 5.0e-5
+
+# Naming and paths
+save_folder: "checkpoints_spk"
+project_name: "tuning-orpheus"
+run_name: "5e4-0"
+
+# Audio parameters
+min_duration: 1.0  # Minimum audio duration in seconds
+max_duration: 21.0  # Maximum audio duration in seconds
+
+# SNAC token configuration
+snac_model: "hubertsiuzdak/snac_24khz"
+sample_rate: 24000
+tokeniser_length: 128256
+start_of_text: 128000
+end_of_text: 128009
+start_of_speech: 128257
+end_of_speech: 128258
+start_of_human: 128259
+end_of_human: 128260
+start_of_ai: 128261
+end_of_ai: 128262
+audio_tokens_start: 128266  # Added to match tokenise_speech_dataset.py
+
+# Maximum sequence length for training
+max_sequence_length: 2048
+
+# Adjust training parameters for memory
+gradient_accumulation_steps: 4
