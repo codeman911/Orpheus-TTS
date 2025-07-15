@@ -147,11 +147,13 @@ def convert_manifest_to_dataset(manifest_path, output_dir):
         
         # Read manifest
         print(f"Reading manifest file: {manifest_path}")
-        with open(manifest_path, 'r') as f:
+        with open(manifest_path, 'r', encoding='utf-8') as f:
             items = [json.loads(line) for line in f if line.strip()]
         
         print(f"Found {len(items)} items in manifest")
         
+        for item in items:
+            print(item.get("duration", 0),"----")
         # Filter by duration
         valid_items = [
             item for item in items
