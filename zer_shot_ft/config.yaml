@@ -1,0 +1,60 @@
+# Dataset Configuration
+# List of paths to your local dataset directories
+TTS_datasets:
+  - "/vast/audio/experiment/Orpheus-TTS/zer_shot_ft/datasets/zr_en/merged"
+  - "/vast/audio/experiment/Orpheus-TTS/zer_shot_ft/datasets/zr_ar/merged"
+  # - "/vast/audio/experiment/Orpheus-TTS/1b_pretrain/datasets/emr_dataset"
+  # - "/vast/audio/experiment/Orpheus-TTS/1b_pretrain/datasets/en_hf"
+  # # Add more paths as needed
+
+# model_name: "canopylabs/orpheus-tts-0.1-pretrained"
+# tokenizer_name: "canopylabs/orpheus-tts-0.1-pretrained"
+
+# model_name: "/vast/audio/experiment/Orpheus-TTS/finetune/checkpoints/checkpoint-375000"
+# tokenizer_name: "/vast/audio/experiment/Orpheus-TTS/finetune/checkpoints/checkpoint-375000"
+
+model_name: "/vast/audio/experiment/Orpheus-TTS/speaker_finetune/checkpoints_spk/checkpoint-16228"
+tokenizer_name: "/vast/audio/experiment/Orpheus-TTS/speaker_finetune/checkpoints_spk/checkpoint-16228"
+# Training Args
+epochs: 10
+batch_size: 4
+number_processes: 8  # Change from 8 to 1 to avoid distributed training issues
+pad_token: 128263
+save_steps: 1500
+# Change from:
+# learning_rate: 6.0e-5
+# To:
+learning_rate: 1.5e-5  # Zero-shot needs lower LR due to longer sequences
+
+# Naming and paths
+save_folder: "checkpoints_zr"
+project_name: "tuning-orpheus"
+run_name: "2e4-0"
+
+# Audio parameters
+min_duration: 1.0  # Minimum audio duration in seconds
+max_duration: 21.0  # Maximum audio duration in seconds
+
+# SNAC token configuration
+snac_model: "hubertsiuzdak/snac_24khz"
+sample_rate: 24000
+tokeniser_length: 128256
+start_of_text: 128000
+end_of_text: 128009
+start_of_speech: 128257
+end_of_speech: 128258
+start_of_human: 128259
+end_of_human: 128260
+start_of_ai: 128261
+end_of_ai: 128262
+audio_tokens_start: 128266  # Added to match tokenise_speech_dataset.py
+
+
+
+# Add/Modify:
+# Change from:
+warmup_ratio: 0.1
+# To:
+warmup_steps: 500  # More precise control for zero-shot setup
+gradient_accumulation_steps: 4  # From 4
+max_sequence_length: 8192 # From 8192 - balance memory/performance
