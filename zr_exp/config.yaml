@@ -15,8 +15,8 @@ TTS_datasets:
 # model_name: "/vast/audio/experiment/Orpheus-TTS/finetune/checkpoints/checkpoint-375000"
 # tokenizer_name: "/vast/audio/experiment/Orpheus-TTS/finetune/checkpoints/checkpoint-375000"
 
-model_name: "/vs/Orpheus-TTS/pretrained_ckpt"
-tokenizer_name: "/vs/Orpheus-TTS/pretrained_ckpt"
+model_name: "/vs/Orpheus-TTS/pretrained_model"
+tokenizer_name: "/vs/Orpheus-TTS/pretrained_model"
 # Training Args
 epochs: 3
 batch_size: 8
