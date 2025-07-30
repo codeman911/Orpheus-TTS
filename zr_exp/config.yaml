@@ -18,7 +18,7 @@ TTS_datasets:
 model_name: "/vs/Orpheus-TTS/pretrained_model"
 tokenizer_name: "/vs/Orpheus-TTS/pretrained_model"
 # Training Args
-epochs: 3
+epochs: 1
 batch_size: 8
 number_processes: 8  # Change from 8 to 1 to avoid distributed training issues
 pad_token: 128263
