@@ -1,9 +1,9 @@
 # Dataset Configuration
 # List of paths to your local dataset directories
 TTS_datasets:
-  - "/vs/Orpheus-TTS/data/zr_new_datset/merged/"
-  - "/vs/Orpheus-TTS/data/zr_ar_new/merged/"
-  - "/vs/Orpheus-TTS/data/zr_en_new/merged/"
+  - "/vs/Orpheus-TTS/data/part1_v3_zr/merged/"
+  - "/vs/Orpheus-TTS/data/zr_ar/merged/"
+  - "/vs/Orpheus-TTS/data/zr_en/merged/"
   # - "/vast/audio/experiment/Orpheus-TTS/zer_shot_ft/datasets/zr_ar/merged"
   # - "/vast/audio/experiment/Orpheus-TTS/1b_pretrain/datasets/emr_dataset"
   # - "/vast/audio/experiment/Orpheus-TTS/1b_pretrain/datasets/en_hf"
@@ -29,7 +29,7 @@ save_steps: 5000
 learning_rate: 2.0e-4  # Zero-shot needs lower LR due to longer sequences
 
 # Naming and paths
-save_folder: "checkpoints_zr_lora_1"
+save_folder: "checkpoints_zr_lora_2"
 project_name: "zr-orpheus"
 run_name: "2e4-0"
 
