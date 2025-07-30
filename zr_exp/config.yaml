@@ -26,10 +26,10 @@ save_steps: 1000
 # Change from:
 # learning_rate: 6.0e-5
 # To:
-learning_rate: 2.0e-4  # Zero-shot needs lower LR due to longer sequences
+learning_rate: 5.0e-5  # Zero-shot needs lower LR due to longer sequences
 
 # Naming and paths
-save_folder: "checkpoints_zr_lora_2"
+save_folder: "checkpoints_zr_ft"
 project_name: "zr-orpheus"
 run_name: "2e4-0"
 
