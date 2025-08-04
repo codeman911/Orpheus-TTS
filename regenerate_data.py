@@ -126,31 +126,29 @@ def process_dataset(dataset_path, output_dir, num_samples=None):
     """Process dataset and regenerate audio from SNAC codes"""
     logger.info(f"Loading dataset from {dataset_path}")
     dataset = load_from_disk(dataset_path)
-    total_samples = len(dataset)
-    logger.info(f"Loaded dataset with {total_samples} samples")
     
-    # Determine how many samples to process
-    if num_samples is None or num_samples <= 0:
-        samples_to_process = total_samples
-        logger.info(f"Processing all {total_samples} samples")
-    else:
-        samples_to_process = min(num_samples, total_samples)
-        logger.info(f"Processing {samples_to_process} out of {total_samples} samples")
+    if num_samples is not None:
+        dataset = dataset.select(range(min(num_samples, len(dataset))))
     
-    # Create output directories
-    ref_audio_dir = os.path.join(output_dir, "reference_audio")
-    ref_text_dir = os.path.join(output_dir, "reference_text")
-    target_audio_dir = os.path.join(output_dir, "target_audio")
-    target_text_dir = os.path.join(output_dir, "target_text")
+    # Create single output directory
+    os.makedirs(output_dir, exist_ok=True)
     
-    for dir_path in [ref_audio_dir, ref_text_dir, target_audio_dir, target_text_dir]:
-        os.makedirs(dir_path, exist_ok=True)
+    # Initialize metadata
+    metadata = {
+        "dataset_info": {
+            "total_samples": 0,
+            "speakers": ["default_spk"],
+            "total_duration": 0.0,
+            "avg_duration": 0.0
+        },
+        "samples": []
+    }
     
     # Process samples
     processed_count = 0
-    for idx in range(samples_to_process):
+    for idx in range(len(dataset)):
         sample = dataset[idx]
-        logger.info(f"Processing sample {idx + 1}/{samples_to_process}")
+        logger.info(f"Processing sample {idx + 1}/{len(dataset)}")
         
         # Extract reference and target audio codes from input_ids and labels
         input_ids = sample['input_ids']
@@ -190,25 +188,29 @@ def process_dataset(dataset_path, output_dir, num_samples=None):
             continue
         
         # Create unique ID for this sample
-        unique_id = f"sample_{idx:08d}"
+        sample_id = f"sample_{idx:08d}"
         
         # Regenerate reference audio
         ref_codes = extract_audio_codes_from_tokens(reference_codes)
         if ref_codes:
             ref_audio = decode_snac_to_audio(ref_codes)
-            ref_audio_path = os.path.join(ref_audio_dir, f"{unique_id}_reference.wav")
+            ref_audio_path = os.path.join(output_dir, f"{sample_id}_reference.wav")
             save_audio(ref_audio, ref_audio_path)
         
         # Regenerate target audio
         target_codes_list = extract_audio_codes_from_tokens(target_codes)
         if target_codes_list:
             target_audio = decode_snac_to_audio(target_codes_list)
-            target_audio_path = os.path.join(target_audio_dir, f"{unique_id}_target.wav")
+            target_audio_path = os.path.join(output_dir, f"{sample_id}_target.wav")
             save_audio(target_audio, target_audio_path)
         
-        # Save reference text (from input_ids before reference audio)
+        # Calculate duration (approximate based on audio length)
+        duration = len(target_audio) / 24000 if target_audio is not None else 0.0
+        
+        # Extract and save reference text
+        ref_text = ""
         try:
-            # Find the first human turn
+            # Extract reference text from input_ids
             first_human_start = input_ids.index(start_of_human)
             first_human_end = input_ids.index(end_of_human, first_human_start)
             
@@ -225,14 +227,15 @@ def process_dataset(dataset_path, output_dir, num_samples=None):
                 tokenizer = AutoTokenizer.from_pretrained("v1kram/zer_v3")
                 ref_text = tokenizer.decode(ref_text_tokens, skip_special_tokens=True)
                 
-                ref_text_path = os.path.join(ref_text_dir, f"{unique_id}_reference.txt")
+                ref_text_path = os.path.join(output_dir, f"{sample_id}_reference.txt")
                 save_text(ref_text, ref_text_path)
             else:
                 logger.warning(f"No reference text found in sample {idx}")
         except (ValueError, IndexError) as e:
             logger.warning(f"Could not extract reference text from sample {idx}: {e}")
         
-        # Save target text (from input_ids after reference audio)
+        # Extract and save target text
+        target_text = ""
         try:
             # Find the second human turn
             second_human_start = None
@@ -257,7 +260,7 @@ def process_dataset(dataset_path, output_dir, num_samples=None):
                     from transformers import AutoTokenizer
                     tokenizer = AutoTokenizer.from_pretrained("v1kram/zer_v3")
                     target_text = tokenizer.decode(target_text_tokens, skip_special_tokens=True)
-                    target_text_path = os.path.join(target_text_dir, f"{unique_id}_target.txt")
+                    target_text_path = os.path.join(output_dir, f"{sample_id}_target.txt")
                     save_text(target_text, target_text_path)
                 else:
                     logger.warning(f"No target text found in sample {idx}")
@@ -266,17 +269,39 @@ def process_dataset(dataset_path, output_dir, num_samples=None):
         except (ValueError, IndexError) as e:
             logger.warning(f"Could not extract target text from sample {idx}: {e}")
         
+        # Add to metadata
+        metadata["samples"].append({
+            "id": sample_id,
+            "audio_file": f"{sample_id}_target.wav",
+            "transcript_file": f"{sample_id}_target.txt",
+            "ref_audio_file": f"{sample_id}_reference.wav",
+            "ref_transcript": ref_text,
+            "duration": duration,
+            "speaker_id": "default_spk"
+        })
+        
         processed_count += 1
+    
+    # Update metadata
+    metadata["dataset_info"]["total_samples"] = processed_count
+    if processed_count > 0:
+        total_duration = sum(sample["duration"] for sample in metadata["samples"])
+        metadata["dataset_info"]["total_duration"] = total_duration
+        metadata["dataset_info"]["avg_duration"] = total_duration / processed_count
+    
+    # Save metadata.json
+    metadata_path = os.path.join(output_dir, "metadata.json")
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
     
     logger.info(f"Processing complete! Processed {processed_count} samples")
     logger.info(f"Output saved to: {output_dir}")
+    logger.info(f"Metadata saved to: {metadata_path}")
     
     return {
         "processed_count": processed_count,
-        "reference_audio_dir": ref_audio_dir,
-        "reference_text_dir": ref_text_dir,
-        "target_audio_dir": target_audio_dir,
-        "target_text_dir": target_text_dir
+        "output_dir": output_dir,
+        "metadata_path": metadata_path
     }
 
 def main():
@@ -291,10 +316,8 @@ def main():
     
     print(f"\n=== Processing Summary ===")
     print(f"Processed samples: {result['processed_count']}")
-    print(f"Reference audio: {result['reference_audio_dir']}")
-    print(f"Reference text: {result['reference_text_dir']}")
-    print(f"Target audio: {result['target_audio_dir']}")
-    print(f"Target text: {result['target_text_dir']}")
+    print(f"Output directory: {result['output_dir']}")
+    print(f"Metadata file: {result['metadata_path']}")
 
 if __name__ == "__main__":
     main()
