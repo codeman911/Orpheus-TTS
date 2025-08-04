@@ -497,16 +497,14 @@ def process_dataset(dataset_path, output_dir, num_samples=None):
         save_text(ref_text, ref_text_path)
         save_text(target_text, target_text_path)
         
-        # Add to metadata
+        # Add to metadata - format compatible with HiggsAudioDataset
         metadata["samples"].append({
             "id": f"sample_{idx:08d}",
+            "audio_file": os.path.basename(target_audio_path),
+            "transcript_file": os.path.basename(target_text_path),
             "ref_audio_file": os.path.basename(ref_audio_path),
-            "target_audio_file": os.path.basename(target_audio_path),
-            "ref_text_file": os.path.basename(ref_text_path),
-            "target_text_file": os.path.basename(target_text_path),
             "ref_transcript": ref_text,
-            "duration": duration,
-            "speaker_id": "default_spk"
+            "duration": duration
         })
         
         processed_count += 1
